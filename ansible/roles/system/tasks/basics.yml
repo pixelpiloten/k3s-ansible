@@ -1,0 +1,19 @@
+---
+  - name: Sets timezone to Stockholm.
+    command: timedatectl set-timezone Europe/Stockholm
+    become: true
+
+  - name: Update APT package manager repositories cache.
+    apt:
+      update_cache: yes
+    become: true
+
+  - name: Installing common tools.
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - htop
+      - unzip
+      - ntp
+    become: true

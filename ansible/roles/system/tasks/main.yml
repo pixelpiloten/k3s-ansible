@@ -1,0 +1,5 @@
+---
+  - include: basics.yml
+  - include: docker.yml
+  - include: k3s.yml
+  - include: firewall.yml

@@ -1,0 +1,46 @@
+---
+  - name: Check if K3S is installed.
+    stat:
+      path: /usr/local/bin/k3s-uninstall.sh
+    register: k3s_uninstaller
+
+  - name: Download K3S installer.
+    get_url:
+        url: https://get.k3s.io 
+        dest: /home/pixelpiloten/k3s-installer.sh
+        mode: "u+x"
+    when: k3s_uninstaller.stat.exists == False
+
+  - name: Install K3S on master.
+    command: /home/pixelpiloten/k3s-installer.sh server --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+    when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
+    become: true
+
+  - name: Register K3S agent join token on master.
+    command: cat /var/lib/rancher/k3s/server/node-token
+    register: k3s_token
+    when: kubernetes_role == "master"
+    become: true
+
+  - name: Add dummyhost to assign K3S agent token.
+    add_host:
+      name:   "k3s_token_holder"
+      token:  "{{ k3s_token.stdout }}"
+
+  - name: Register K3S kubeconfig.
+    command: cat /etc/rancher/k3s/k3s.yaml
+    register: k3s_config
+    when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
+    become: true
+
+  - name: Get the K3S config.
+    local_action:
+      module: copy
+      content: "{{ k3s_config.stdout }}"
+      dest: /tmp/kubeconfig.yaml
+    when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
+
+  - name: Install K3S on slave.
+    command: /home/pixelpiloten/k3s-installer.sh agent --server {{ kubernetes_master_server }} --token {{ hostvars['k3s_token_holder']['token'] }}"
+    when: kubernetes_role == "worker" and k3s_uninstaller.stat.exists == False
+    become: true
