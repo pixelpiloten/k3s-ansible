@@ -1,6 +1,7 @@
 all:
     vars:
         ansible_python_interpreter: /usr/bin/python3
+        k3s_version: v0.9.1
         kubernetes_master_server: https://node01.example.com:6443
         allowed_kubernetes_access:
             - 1.2.3.4

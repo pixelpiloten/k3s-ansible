@@ -12,7 +12,7 @@
     when: k3s_uninstaller.stat.exists == False
 
   - name: Install K3S on master.
-    command: /home/pixelpiloten/k3s-installer.sh server --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+    command: export INSTALL_K3S_VERSION={{ k3s_version }} && /home/pixelpiloten/k3s-installer.sh server --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule"
     when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
     become: true
 
@@ -40,7 +40,7 @@
       dest: /tmp/kubeconfig.yaml
     when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
 
-  - name: Install K3S on slave.
-    command: /home/pixelpiloten/k3s-installer.sh agent --server {{ kubernetes_master_server }} --token {{ hostvars['k3s_token_holder']['token'] }}"
+  - name: Install K3S on worker.
+    command: export INSTALL_K3S_VERSION={{ k3s_version }} && /home/pixelpiloten/k3s-installer.sh agent --server {{ kubernetes_master_server }} --token {{ hostvars['k3s_token_holder']['token'] }}"
     when: kubernetes_role == "worker" and k3s_uninstaller.stat.exists == False
     become: true
