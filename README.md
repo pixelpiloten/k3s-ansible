@@ -56,6 +56,7 @@ Configure your inventory file with the servers you have, you can add how many wo
       ansible_python_interpreter: /usr/bin/python3
       k3s_version: v0.9.1 # Corresponds with the release on github.
       kubernetes_master_server: https://node01.example.com:6443 # Change to your master server
+      install_user: vagrant
       allowed_kubernetes_access: # Change these to a list of ips outside your cluster that should have access to the api server.
         - 1.2.3.4
         - 1.2.3.5
