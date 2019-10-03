@@ -41,9 +41,9 @@
       state: present
     become: true
 
-  - name: Add pixelpiloten to docker group.
+  - name: Add install_user to docker group.
     user:
-      name: pixelpiloten
+      name: "{{ install_user }}"
       groups: docker
       append: yes
     become: true

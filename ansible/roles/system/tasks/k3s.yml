@@ -7,12 +7,14 @@
   - name: Download K3S installer.
     get_url:
         url: https://get.k3s.io 
-        dest: /home/pixelpiloten/k3s-installer.sh
+        dest: /home/{{ install_user }}/k3s-installer.sh
         mode: "u+x"
     when: k3s_uninstaller.stat.exists == False
 
   - name: Install K3S on master.
-    command: export INSTALL_K3S_VERSION={{ k3s_version }} && /home/pixelpiloten/k3s-installer.sh server --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+    command: /home/{{ install_user }}/k3s-installer.sh server --bind-address {{ node_ip }} --node-label kubernetes.io/role=master --node-label node-role.kubernetes.io/master=true --node-taint node-role.kubernetes.io/master=true:NoSchedule
+    environment:
+      INSTALL_K3S_VERSION: "{{ k3s_version }}"
     when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
     become: true
 
@@ -41,6 +43,8 @@
     when: kubernetes_role == "master" and k3s_uninstaller.stat.exists == False
 
   - name: Install K3S on worker.
-    command: export INSTALL_K3S_VERSION={{ k3s_version }} && /home/pixelpiloten/k3s-installer.sh agent --server {{ kubernetes_master_server }} --token {{ hostvars['k3s_token_holder']['token'] }}"
+    command: /home/{{ install_user }}/k3s-installer.sh agent --server {{ kubernetes_master_server }} --token {{ hostvars['k3s_token_holder']['token'] }}
+    environment:
+      INSTALL_K3S_VERSION: "{{ k3s_version }}"
     when: kubernetes_role == "worker" and k3s_uninstaller.stat.exists == False
     become: true
